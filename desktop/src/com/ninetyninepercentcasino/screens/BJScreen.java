@@ -9,7 +9,6 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.ninetyninepercentcasino.MainCasino;
-import com.ninetyninepercentcasino.bj.BJClient;
 import com.ninetyninepercentcasino.bj.BJStage;
 import com.ninetyninepercentcasino.net.BJBeginGame;
 import com.ninetyninepercentcasino.net.DTO;
