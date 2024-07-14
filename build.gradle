@@ -67,10 +67,6 @@ project(":desktop") {
 
 project(":core") {
 	apply plugin: "java-library"
-
-	dependencies {
-		implementation project(":chain")
-	}
 }
 
 project(":chain") {
