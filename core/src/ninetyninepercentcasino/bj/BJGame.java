@@ -26,7 +26,6 @@ public class BJGame extends Thread {
 	private Stack<BJHand> hands; //keeps track of the hands remaining to play
 	private Stack<BJHand> resolved; //keeps track of all the resolved hands
 
-	private final BJSynchronizer bjSynchronizer; //syc
 	private int firstBet;
 	private int insuranceBet;
 	private BJAction action;
@@ -39,7 +38,6 @@ public class BJGame extends Thread {
 		this.player = player;
 		hands = new Stack<>();
 		resolved = new Stack<>();
-		bjSynchronizer = new BJSynchronizer();
 	}
 	/**
 	 * main driver for a blackjack game
@@ -159,35 +157,13 @@ public class BJGame extends Thread {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		synchronized (bjSynchronizer) {
-			try {
-				bjSynchronizer.wait(); //waits until the client returns the amount bet
-			} catch (InterruptedException e) {
-			}
-		}
 	}
 
 	/**
 	 * sends an insurance request to the player and waits until a bet has been received
 	 */
 	private void getInsurance() {
-		NetMessage insuranceMessage = new NetMessage(NetMessage.MessageType.INFO, new BJInsuranceMessage());
-		try {
-			player.getConnection().message(insuranceMessage);
-		} catch (SocketException e) {
-			try {
-				player.getConnection().finish();
-			} catch (IOException f) {
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		synchronized (bjSynchronizer) {
-			try {
-				bjSynchronizer.wait(); //waits until the client returns the amount bet
-			} catch (InterruptedException e) {
-			}
-		}
+
 	}
 
 	/**
@@ -216,17 +192,7 @@ public class BJGame extends Thread {
 	 * called when the client needs to be updated about a card that was drawn
 	 */
 	private void drawCardUpdate(Card card, boolean visible, boolean isPlayerCard) {
-		NetMessage cardUpdate = new NetMessage(NetMessage.MessageType.INFO, new BJCardUpdate(card, visible, isPlayerCard));
-		try {
-			player.getConnection().message(cardUpdate);
-		} catch (SocketException e) {
-			try {
-				player.getConnection().finish();
-			} catch (IOException f) {
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+
 		pause();
 	}
 
@@ -236,24 +202,7 @@ public class BJGame extends Thread {
 	 * @param availableActions the available actions
 	 */
 	private void sendOptions(HashMap<BJAction, Boolean> availableActions, boolean handOver) {
-		BJAvailActionUpdate update = new BJAvailActionUpdate(availableActions);
-		NetMessage actionUpdate = new NetMessage(NetMessage.MessageType.INFO, update);
-		try {
-			player.getConnection().message(actionUpdate);
-			if (!handOver) {
-				synchronized (bjSynchronizer) {
-					bjSynchronizer.wait(); //waits until the client returns the action
-				}
-			}
-		} catch (SocketException e) {
-			try {
-				player.getConnection().finish();
-			} catch (IOException f) {
-			}
-		} catch (InterruptedException e) {
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+
 	}
 
 	/**
@@ -262,17 +211,7 @@ public class BJGame extends Thread {
 	 * @param hand2 the hand that will be played out second
 	 */
 	private void signalSplit(Hand hand1, Hand hand2) {
-		NetMessage splitUpdate = new NetMessage(NetMessage.MessageType.INFO, new BJSplit(hand1, hand2));
-		try {
-			player.getConnection().message(splitUpdate); //message the player about the split information
-		} catch (SocketException e) {
-			try {
-				player.getConnection().finish();
-			} catch (IOException f) {
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
 	}
 
 	/**
@@ -281,17 +220,7 @@ public class BJGame extends Thread {
 	 * @param winnings
 	 */
 	private void sendHandEnd(int outcome, int winnings) {
-		NetMessage handEndUpdate = new NetMessage(NetMessage.MessageType.INFO, new BJHandEnd(outcome, winnings));
-		try {
-			player.getConnection().message(handEndUpdate); //message the player about the hand end
-		} catch (SocketException e) {
-			try {
-				player.getConnection().finish();
-			} catch (IOException f) {
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		N
 	}
 
 	/**
@@ -299,21 +228,9 @@ public class BJGame extends Thread {
 	 * @param winnings the amount won
 	 */
 	private void payoutPlayer(int winnings){
-		System.out.println("payout");
-		NetMessage payoutMessage = new NetMessage(NetMessage.MessageType.INFO, new BJPayout(winnings));
-		try {
-			player.getConnection().message(payoutMessage); //message the player about the hand end
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+
 	}
 
-	/**
-	 * @return the synchronizer for this game
-	 */
-	public BJSynchronizer getBjSynchronizer() {
-		return bjSynchronizer;
-	}
 	/**
 	 * called by the ServerConnection managing the game when it receives the client's first bet
 	 * @param firstBet the amount the client has chosen to bet
